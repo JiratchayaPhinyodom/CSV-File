@@ -1,0 +1,163 @@
+import csv
+
+# open Players.csv file with csv.DictReader and read its content into a list of dictionary, players_data
+players_data = []
+with open('Players.csv', 'r') as f:
+    rows = csv.DictReader(f)
+    for r in rows:
+        players_data.append(r)
+
+# open Teams.csv file with csv.DictReader and read its content into a list of dictionary, teams_data
+teams_data = []
+with open('Teams.csv', 'r') as f:
+    rows = csv.DictReader(f)
+    for r in rows:
+        teams_data.append(r)
+
+
+def average_shots(players_data):
+    """First I build the data "defender", "midfielder", "forward", "goalkeeper" in list name positions
+    and I appreciate data in positions and players_data as well because I want to make a conditions if position data
+    in players_data same as data in position list that will have list name shot append shots data in players_data.
+    Last build list name result to append the average of shots and return a tuple of results list."""
+    """Returns a tuple with four elements; the first, second, third, and
+    fourth elements show the average number of shots made by defenders,
+    midfielders, forwards, and goalkeepers, respectively
+
+    Notes: the test results below are printed out with two decimal places to
+    get around floating-point errors.
+
+    >>> averages = average_shots(players_data)
+    >>> type(averages)
+    <class 'tuple'>
+    >>> [f'{a:.2f}' for a in averages]
+    ['1.16', '2.39', '4.23', '0.03']
+    """
+    result = []
+    positions = ["defender", "midfielder", "forward", "goalkeeper"]
+    for position in positions:
+        shot = []
+        for player in players_data:
+            if player['position'] == position:
+                shot.append(float(player['shots']))
+        result.append(sum(shot)/len(shot))
+    return tuple(result)
+
+
+def max_GF_GA_ratio(teams_data):
+    """First use For to appreciate the data.Second build 2 dictionary to get the data goalsFor and goalsAgainst.
+    Then use for to appreciate 2 dictionary and make a condition if team of goalsFor same as team of goalsAgainst
+    that will have 1 dictionary and 1 list to save the data of goals_For divided by goals_Against.
+    Last make a condition if result == max(ratio): that will return name team."""
+    """Returns the string name of a team with highest ratio of goalsFor to
+    goalsAgainst
+#goalsFor/goals
+    >>> max_GF_GA_ratio(teams_data)
+    'Portugal'
+    """
+    dict_GF = {}
+    dict_GA = {}
+    dict_result = {}
+    ratio = []
+    for goal in teams_data:
+        dict_GF[goal['team']] = float(goal['goalsFor'])
+        dict_GA[goal['team']] = float(goal['goalsAgainst'])
+    for team_For, goals_For in dict_GF.items():
+        for team_Against, goals_Against in dict_GA.items():
+            if team_For == team_Against:
+                dict_result[team_For] = goals_For/goals_Against
+                ratio.append(goals_For/goals_Against)
+    for team_For, result in dict_result.items():
+        if result == max(ratio):
+            return team_For
+
+
+def whose_player_list(players_data, teams_data):
+    """This function its important to check all of condition in this function they want a player who
+    is on a team ranked in the top 10, plays less than 250 minutes and makes
+    more than 150 passes; the format for each tuple is (player's surname, team
+    played for, team ranking, minutes played, number of passes) and return a list of tuple."""
+    """Returns a list of tuples; each tuple has information about a player who
+    is on a team ranked in the top 10, plays less than 250 minutes and makes
+    more than 150 passes; the format for each tuple is (player's surname, team
+    played for, team ranking, minutes played, number of passes)
+
+    >>> whose_player_list(players_data, teams_data)
+    [('Veron', 'Argentina', 7, 185, 235), ('Montolivo', 'Italy', 5, 236, 163)]
+    """
+    # Reminder: Convert minutes and passes to integers before comparing to values
+    player_list = []
+    for player in players_data:
+        for team in teams_data:
+            if int(player['minutes']) < 250:
+                if int(player['passes']) > 150:
+                    if player['team'] == team['team']:
+                        if int(team['ranking']) <= 10:
+                            player_list.append((player['surname'], player['team'], int(team['ranking'])
+                                                , int(player['minutes']), int(player['passes'])))
+    return player_list
+
+
+def team_list_shots_per_minute(players_data, teams_data):
+    """Use For to appreciate the data and make a condition if player['team'] == team['team']
+    that will have 2 values to sum every number of shots and minutes in the condition.
+    Last return list of tuple that will have name team data and the data of shots divided by minutes."""
+    """Returns a list of tuples; each tuple has information about a team and
+    its shots per minute value generated by its players
+
+    Notes: the test results below are printed out with five decimal places to
+    get around floating-point errors.
+
+    >>> list_of_tuples = team_list_shots_per_minute(players_data, teams_data)
+    >>> list_of_tuples.sort()
+    >>> for team,shots in list_of_tuples:
+    ...     print(f'{team} {shots:.5f}')
+    ... 
+    Algeria 0.01050
+    Argentina 0.01394
+    Australia 0.01010
+    Brazil 0.01440
+    Cameroon 0.01178
+    Chile 0.01152
+    Denmark 0.01077
+    England 0.01237
+    France 0.00998
+    Germany 0.01121
+    Ghana 0.01337
+    Greece 0.01077
+    Honduras 0.00438
+    Italy 0.01212
+    Ivory Coast 0.01313
+    Japan 0.00886
+    Mexico 0.01086
+    Netherlands 0.01128
+    New Zealand 0.00505
+    Nigeria 0.00996
+    North Korea 0.01077
+    Paraguay 0.00928
+    Portugal 0.01263
+    Serbia 0.01286
+    Slovakia 0.00884
+    Slovenia 0.00572
+    South Africa 0.01184
+    South Korea 0.01111
+    Spain 0.01380
+    Switzerland 0.00721
+    USA 0.01282
+    Uruguay 0.01118
+    """
+    result = []
+    for team in teams_data:
+        shots = 0
+        minutes = 0
+        for player in players_data:
+            if player['team'] == team['team']:
+                shots += int(player['shots'])
+                minutes += int(player['minutes'])
+        result.append((team['team'], (shots/minutes)))
+    return result
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
